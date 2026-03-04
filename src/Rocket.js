@@ -6,35 +6,52 @@ export class Rocket {
 
         // Materials
         const silverMat = new THREE.MeshStandardMaterial({
-            color: 0xe0e0e0,
-            metalness: 0.8,
-            roughness: 0.35,
+            color: 0xe7edf6,
+            metalness: 0.88,
+            roughness: 0.24,
+            envMapIntensity: 1.1,
         });
 
         const redMat = new THREE.MeshStandardMaterial({
-            color: 0xcc1111,
-            metalness: 0.2,
-            roughness: 0.4,
+            color: 0xcd1b1b,
+            metalness: 0.35,
+            roughness: 0.32,
+            envMapIntensity: 1.0,
         });
 
         const darkBlueGlassMat = new THREE.MeshPhysicalMaterial({
-            color: 0x05102a,
+            color: 0x071426,
             metalness: 0.9,
-            roughness: 0.1,
+            roughness: 0.06,
             clearcoat: 1.0,
             clearcoatRoughness: 0.1,
+            transmission: 0.18,
+            ior: 1.25,
         });
 
         const darkMetalMat = new THREE.MeshStandardMaterial({
             color: 0x444444,
             metalness: 0.7,
-            roughness: 0.6,
+            roughness: 0.45,
         });
 
         // 1. Body (Silver Cylinder)
         const bodyGeom = new THREE.CylinderGeometry(0.8, 0.8, 3, 32);
         const body = new THREE.Mesh(bodyGeom, silverMat);
         this.group.add(body);
+
+        // Subtle cyan reflective strip to blend with nearby tech-planet lighting.
+        const rimStripGeom = new THREE.CylinderGeometry(0.81, 0.81, 2.6, 28, 1, true, Math.PI * 0.82, Math.PI * 0.36);
+        const rimStripMat = new THREE.MeshBasicMaterial({
+            color: 0x69e9ff,
+            transparent: true,
+            opacity: 0.13,
+            blending: THREE.AdditiveBlending,
+            side: THREE.DoubleSide
+        });
+        const rimStrip = new THREE.Mesh(rimStripGeom, rimStripMat);
+        rimStrip.position.set(-0.06, 0.08, -0.04);
+        this.group.add(rimStrip);
 
         // Panel seams (Rivets simulation via Torus rings)
         const seamGeom = new THREE.TorusGeometry(0.805, 0.02, 8, 32);
@@ -148,32 +165,33 @@ export class Rocket {
         this.flameGroup.add(this.flameOuter, this.flameMid, this.flameCore);
 
         // point light bloom for the fire
-        const flameLight = new THREE.PointLight(0xffaa00, 4, 15);
-        flameLight.position.y = -2;
-        this.flameGroup.add(flameLight);
+        this.flameLight = new THREE.PointLight(0xffa348, 3.8, 14);
+        this.flameLight.position.y = -2;
+        this.flameGroup.add(this.flameLight);
 
         // Initial orientation
-        this.group.scale.set(0.6, 0.6, 0.6);
+        this.group.scale.set(0.5, 0.5, 0.5); // Scaled down for breathing room
         this.group.rotation.x = Math.PI / 8;
-        this.group.rotation.y = -Math.PI / 6;
+        this.group.rotation.y = Math.PI / 5;
+        this.group.rotation.z = Math.PI / 10;
     }
 
-    update(time) {
+    update(time, motionScale = 1) {
         // Flame animation (pulsing)
         const pulse = Math.sin(time * 20) * 0.05 + Math.sin(time * 30) * 0.02;
         this.flameCore.scale.setScalar(0.3 * (1 + pulse));
         this.flameMid.scale.setScalar(0.45 * (1 + pulse * 1.5));
         this.flameOuter.scale.setScalar(0.6 * (1 + pulse * 2));
+        this.flameLight.intensity = 3.6 + Math.sin(time * 18) * 0.35;
 
-        // Smooth idle hover animation (drift & tilt)
-        // Gentle floating up and down
-        this.group.position.y = Math.sin(time * 1.2) * 0.2;
-        // Slight side-to-side drift
-        this.group.position.x = Math.cos(time * 0.8) * 0.15;
+        // Gentle hover with drifting and light tilt
+        this.group.position.y = Math.sin(time * 0.88) * 0.14 * motionScale;
+        this.group.position.x = Math.cos(time * 0.54) * 0.11 * motionScale;
+        this.group.position.z = Math.sin(time * 0.46) * 0.09 * motionScale;
 
-        // Small tilt rotations to avoid rigid stillness (approx ±5° to ±10°)
-        this.group.rotation.x = (Math.PI / 8) + Math.sin(time * 1.5) * 0.1;
-        this.group.rotation.y = (-Math.PI / 6) + Math.cos(time * 1.1) * 0.15;
-        this.group.rotation.z = Math.sin(time * 1.8) * 0.08;
+        // Keep tilt subtle and smooth
+        this.group.rotation.x = (Math.PI / 8) + Math.sin(time * 1.02) * 0.065 * motionScale;
+        this.group.rotation.y = (-Math.PI / 5.2) + Math.cos(time * 0.82) * 0.105 * motionScale;
+        this.group.rotation.z = Math.sin(time * 1.16) * 0.05 * motionScale;
     }
 }
