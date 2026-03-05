@@ -109,6 +109,7 @@ canvas#canvas3d {
   height: 100% !important;
   z-index: 0;
   pointer-events: none;
+  will-change: transform;
 }
 
 main {
@@ -157,8 +158,8 @@ section {
   inset: -1.2rem -1rem -1.2rem -1.4rem;
   border-radius: 1.4rem;
   background:
-    linear-gradient(100deg, rgba(4, 8, 22, 0.62), rgba(4, 8, 22, 0.18) 65%, rgba(4, 8, 22, 0));
-  backdrop-filter: blur(1.5px);
+    linear-gradient(102deg, rgba(4, 8, 22, 0.36), rgba(4, 8, 22, 0.08) 62%, rgba(4, 8, 22, 0));
+  backdrop-filter: blur(0.8px);
   z-index: -1;
 }
 
@@ -212,6 +213,7 @@ h1 {
 
 #hero .content > * {
   transform: translateZ(0);
+  will-change: transform, opacity;
 }
 
 .glass-section {
@@ -227,6 +229,7 @@ h1 {
   min-height: auto;
   max-width: 1000px;
   width: 90%;
+  will-change: transform, opacity;
 }
 
 .glass-section:hover {
